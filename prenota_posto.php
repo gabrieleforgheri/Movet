@@ -7,7 +7,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.php">Prenotazioni Pullman</a>
+        <a class="navbar-brand" href="index.php">Piattaforma Movet</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -29,20 +29,16 @@
         <h1 class="text-center mb-4">Prenota un Posto</h1>
         <form action="prenota_posto.php" method="post" class="needs-validation" novalidate>
             <div class="form-group">
-                <label for="cod">Codice Biglietto:</label>
-                <input type="text" class="form-control" id="cod" name="cod" required>
+                <label for="luogoP">Luogo di Partenza:</label>
+                <input type="text" class="form-control" id="luogoP" name="luogoP" required>
             </div>
             <div class="form-group">
-                <label for="costo">Costo:</label>
-                <input type="text" class="form-control" id="costo" name="costo" required>
+                <label for="luogoA">Luogo di Arrivo:</label>
+                <input type="text" class="form-control" id="luogoA" name="luogoA" required>
             </div>
             <div class="form-group">
-                <label for="validita">Validità:</label>
-                <input type="date" class="form-control" id="validita" name="validita" required>
-            </div>
-            <div class="form-group">
-                <label for="numCorsa">Numero Corsa:</label>
-                <input type="text" class="form-control" id="numCorsa" name="numCorsa" required>
+                <label for="oraP">Ora di Partenza:</label>
+                <input type="time" class="form-control" id="oraP" name="oraP" required>
             </div>
             <div class="form-group">
                 <label for="cfPasseggero">CF Passeggero:</label>
@@ -52,10 +48,9 @@
         </form>
         <?php
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $cod = $_POST['cod'];
-            $costo = $_POST['costo'];
-            $validita = $_POST['validita'];
-            $numCorsa = $_POST['numCorsa'];
+            $luogoP = $_POST['luogoP'];
+            $luogoA = $_POST['luogoA'];
+            $oraP = $_POST['oraP'];
             $cfPasseggero = $_POST['cfPasseggero'];
 
             $servername = "localhost";
@@ -71,12 +66,25 @@
                 die("Connection failed: " . $conn->connect_error);
             }
 
-            $sql = "INSERT INTO Biglietto (cod, costo, validità, numCorsa, cfPasseggero) VALUES ('$cod', '$costo', '$validita', '$numCorsa', '$cfPasseggero')";
+            // Trova la corsa corrispondente
+            $sql = "SELECT * FROM Corsa WHERE luogoP='$luogoP' AND luogoA='$luogoA' AND oraP='$oraP'";
+            $result = $conn->query($sql);
 
-            if ($conn->query($sql) === TRUE) {
-                echo "<div class='alert alert-success mt-4'>Prenotazione effettuata con successo!</div>";
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $numCorsa = $row['num'];
+                $nFermate = $row['nFermate'];
+                $costo = $nFermate * 0.50; // Calcola il costo in base al numero di fermate (0.50€ per fermata)
+
+                // Inserisce il biglietto nel database
+                $sql = "INSERT INTO Biglietto (costo, validità, numCorsa, cfPasseggero) VALUES ('$costo', CURDATE(), '$numCorsa', '$cfPasseggero')";
+                if ($conn->query($sql) === TRUE) {
+                    echo "<div class='alert alert-success mt-4'>Prenotazione effettuata con successo! Costo: €$costo</div>";
+                } else {
+                    echo "<div class='alert alert-danger mt-4'>Errore: " . $sql . "<br>" . $conn->error . "</div>";
+                }
             } else {
-                echo "<div class='alert alert-danger mt-4'>Errore: " . $sql . "<br>" . $conn->error . "</div>";
+                echo "<div class='alert alert-danger mt-4'>Nessuna corsa trovata per la tratta specificata.</div>";
             }
 
             $conn->close();
