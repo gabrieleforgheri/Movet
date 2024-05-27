@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['cf'])) {
+    header("Location: index.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,20 +16,23 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.php">Piattaforma Movet</a>
+        <a class="navbar-brand" href="home.php">Piattaforma Movet</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php">Visualizza Corse</a>
+                    <a class="nav-link" href="home.php">Visualizza Corse</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="prenota_posto.php">Prenota Posto</a>
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="cancella_prenotazione.php">Cancella Prenotazione</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout.php">Logout</a>
                 </li>
             </ul>
         </div>
